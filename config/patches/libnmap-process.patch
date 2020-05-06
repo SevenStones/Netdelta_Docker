@@ -1,0 +1,16 @@
+--- process.cp	2020-04-01 23:05:41.371914425 +0100
++++ process.py.moded	2020-04-01 22:49:46.636326983 +0100
+@@ -436,6 +436,13 @@
+         return self.__nmap_command_line or ''
+ 
+     @property
++    def process_id(self):
++        """
++        Added by Ian Tibble, return unix pid for nmap process, allows it to be cancelled by user
++        """
++        return self.__nmap_proc.pid
++
++    @property
+     def targets(self):
+         """
+         Provides the list of targets to scan

@@ -1,0 +1,8 @@
+ndwww/wsgi.py
+ndwww/settings.py
+*.pyc
+www/migrations
+.idea
+.git
+logs/*log
+._*
