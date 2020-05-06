@@ -9,6 +9,7 @@ ENV LETSENCRYPT_HOME /etc/letsencrypt
 
 ENV WEBMASTER_MAIL "ian.tibble@netdelta.io"
 ENV DOCKYARD_SRC=nd_base
+ENV DOCKYARD_CONFIG=config_base
 # Directory in container for all project files
 ENV DOCKYARD_SRVHOME=/srv
 # Directory in container for project source files
@@ -31,7 +32,7 @@ RUN echo $WEBMASTER_MAIL > /etc/container_environment/WEBMASTER_MAIL && \
 RUN apt-get -y update && \
     apt-get install -q -y curl apache2 && \
     apt-get install -q -y apt-utils python3.6 python3-pip mysql-client net-tools rsync python-mysqldb rabbitmq-server && \
-    apt-get install -q -y nmap libapache2-mod-wsgi-py3 postfix python3-venv netcat-openbsd vim openssh-server ntpdate
+    apt-get install -q -y nmap postfix python3-venv netcat-openbsd vim openssh-server ntpdate
 
 RUN apt-get -y install software-properties-common
 RUN add-apt-repository ppa:certbot/certbot
@@ -48,7 +49,7 @@ RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 RUN mkdir -p /var/www/html/
 
 # configure apache
-ADD $DOCKYARD_SRC/netdelta/config/ports.conf /etc/apache2/
+ADD $DOCKYARD_CONFIG/config/ports.conf /etc/apache2/
 
 RUN echo "ServerName localhost" >> /etc/apache2/conf-enabled/hostname.conf && \
     a2enmod ssl headers proxy proxy_http proxy_html xml2enc rewrite usertrack remoteip && \
@@ -69,18 +70,17 @@ EXPOSE 80 443 8000
 RUN mkdir -pv /srv/netdelta
 
 COPY $DOCKYARD_SRC $DOCKYARD_STAGING
-
+COPY $DOCKYARD_CONFIG $DOCKYARD_STAGING
 
 
 RUN cd /srv && python3 -m venv netdelta304
 RUN chmod 755 $VENVDIR/bin/activate
 
-COPY $DOCKYARD_SRC/netdelta/requirements.txt $VENVDIR
+COPY $DOCKYARD_CONFIG/config/requirements.txt $VENVDIR
 
 RUN $VENVDIR/bin/pip3 install wheel
 RUN $VENVDIR/bin/pip3 install -r $VENVDIR/requirements.txt
 
-COPY $DOCKYARD_SRC/netdelta/config/run_web.sh /srv/staging
 #COPY ./run_netdelta.sh /srv/staging
 VOLUME [ "$LETSENCRYPT_HOME", "/etc/apache2/sites-available", "/var/log/apache2", "/srv/netdelta"]
-ENTRYPOINT ["/srv/staging/netdelta/config/run_web.sh"]
+ENTRYPOINT ["/srv/staging/config/run_web.sh"]

@@ -13,11 +13,12 @@ VENV_ROOT="/srv/netdelta304"
 MYSQL_DIR="${VENV_ROOT}/lib/python3.6/site-packages/django/db/backends/mysql"
 LIBNMAP_DIR="${VENV_ROOT}/lib/python3.6/site-packages/libnmap"
 SITE_ROOT="/srv"
+CONFIG_ROOT="/srv/staging/config"
 
 function patch_MySQL_base(){
   echo "Applying patch for base.py (MySQL Django framework)"
   cp -v ${MYSQL_DIR}/base.py ${MYSQL_DIR}/base.orig
-  patch ${MYSQL_DIR}/base.py -i /srv/staging/netdelta/config/patches/base.patch \
+  patch ${MYSQL_DIR}/base.py -i $CONFIG_ROOT/patches/base.patch \
   -o ${MYSQL_DIR}/base.patched
   if [ "$?" == 0 ]; then
       echo -e "Successfully patched base.py file: [${GREEN}OK${NC}]"
@@ -33,7 +34,7 @@ function patch_MySQL_base(){
 function patch_libnmap(){
   echo "Applying patch for libnmap"
   cp -v ${LIBNMAP_DIR}/process.py ${LIBNMAP_DIR}/process.orig
-  patch ${LIBNMAP_DIR}/process.py -i /srv/staging/netdelta/config/patches/libnmap-process.patch \
+  patch ${LIBNMAP_DIR}/process.py -i $CONFIG_ROOT/patches/libnmap-process.patch \
   -o ${LIBNMAP_DIR}/process.patched
   if [ "$?" == 0 ]; then
       echo -e "Successfully patched libnmap process.py: [${GREEN}OK${NC}]"
@@ -101,7 +102,7 @@ mkdir -pv /var/www/html/$1
 ##django-admin startapp nd
 
 echo "Syncing code base and tools"
-rsync -azrlv --exclude-from=/srv/staging/netdelta/config/deploy-excludes.txt /srv/staging/ /srv/
+rsync -azrlv --exclude-from=$CONFIG_ROOT/deploy-excludes.txt /srv/staging/ /srv/
 
 echo "listing of /srv/netdelta304"
 ls -lR /srv/netdelta304
@@ -116,7 +117,7 @@ patch_MySQL_base
 patch_libnmap
 
 echo "Adjusting settings.py database name"
-cp -v ${SITE_ROOT}/netdelta/config/settings.py ${SITE_ROOT}/netdelta/netdelta
+cp -v $CONFIG_ROOT/settings.py ${SITE_ROOT}/netdelta/netdelta
 sed -i -E "s/SITENAME/$1/g" ${SITE_ROOT}/netdelta/netdelta/settings.py
 
 echo "netdelta database tables setup"
@@ -129,16 +130,16 @@ echo "from django.contrib.auth.models import User; User.objects.filter(email='it
 User.objects.create_superuser('admin', 'itibble@gmail.com', 'octl1912')" | $VENV_ROOT/bin/python3 manage.py shell
 
 echo "Adjusting wsgi.py"
-cp -v ${SITE_ROOT}/netdelta/config/wsgi.py ${SITE_ROOT}/netdelta/netdelta
+cp -v $CONFIG_ROOT/wsgi.py ${SITE_ROOT}/netdelta/netdelta
 
 echo -e "Adjusting Apache site files for $1.conf"
-cp -v /srv/staging/netdelta/config/new.conf /etc/apache2/sites-available
+cp -v $CONFIG_ROOT/new.conf /etc/apache2/sites-available
 mv -v /etc/apache2/sites-available/new.conf /etc/apache2/sites-available/$1.conf
 sed -i -E "s/SITE/$1/g" /etc/apache2/sites-available/$1.conf
 
 
-/srv/staging/netdelta/config/fixperms.bash
-cp -v /srv/staging/netdelta/config/fixperms.bash /usr/local/bin
+$CONFIG_ROOT/fixperms.bash
+cp -v $CONFIG_ROOT/fixperms.bash /usr/local/bin
 
 echo "enabling site"
 a2ensite $1.conf
