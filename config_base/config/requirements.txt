@@ -13,6 +13,7 @@ importlib-metadata==1.6.0
 iptools==0.7.0
 kombu==4.6.8
 more-itertools==8.2.0
+mod-wsgi==4.7.1
 netaddr==0.7.19
 packaging==20.3
 PyMySQL==0.9.3

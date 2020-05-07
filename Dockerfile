@@ -31,8 +31,8 @@ RUN echo $WEBMASTER_MAIL > /etc/container_environment/WEBMASTER_MAIL && \
 # ADD resources/etc/apt/ /etc/apt/
 RUN apt-get -y update && \
     apt-get install -q -y curl apache2 && \
-    apt-get install -q -y apt-utils python3.6 python3-pip mysql-client net-tools rsync python-mysqldb rabbitmq-server && \
-    apt-get install -q -y nmap postfix python3-venv netcat-openbsd vim openssh-server ntpdate
+    apt-get install -q -y apt-utils python3.6 python3-pip python3.6-dev mysql-client net-tools rsync python-mysqldb rabbitmq-server && \
+    apt-get install -q -y nmap postfix python3-venv apache2-dev netcat-openbsd vim openssh-server ntpdate
 
 RUN apt-get -y install software-properties-common
 RUN add-apt-repository ppa:certbot/certbot
@@ -43,6 +43,8 @@ RUN apt-get install -y debconf-utils && \
     echo mysql-server mysql-server/root_password_again password ankSQL4r4 | debconf-set-selections && \
     apt-get install -y mysql-server -o pkg::Options::="--force-confdef" -o pkg::Options::="--force-confold" --fix-missing && \
     apt-get clean 
+
+RUN apt-get remove -y python3-dev
 
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

@@ -132,6 +132,12 @@ User.objects.create_superuser('admin', 'itibble@gmail.com', 'octl1912')" | $VENV
 echo "Adjusting wsgi.py"
 cp -v $CONFIG_ROOT/wsgi.py ${SITE_ROOT}/netdelta/netdelta
 
+echo "Removing mod_wsgi Apache module"
+a2dismod mod_wsgi
+
+echo "Adjusting apache2.conf"
+cat $CONFIG_ROOT/apache2-conf-add-on.txt >> /etc/apache2/apache2.conf
+
 echo -e "Adjusting Apache site files for $1.conf"
 cp -v $CONFIG_ROOT/new.conf /etc/apache2/sites-available
 mv -v /etc/apache2/sites-available/new.conf /etc/apache2/sites-available/$1.conf

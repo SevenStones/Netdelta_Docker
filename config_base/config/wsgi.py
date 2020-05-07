@@ -10,11 +10,11 @@ import os
 import sys
 import site
 
-BASE_DIR = "/srv/netdelta/netdelta"
+BASE_DIR = "/srv/netdelta"
 venv_root = "/srv/netdelta304"
 
 # Add the site-packages of the chosen virtualenv to work with
-site.addsitedir(venv_root + '/local/lib/python3.6/site-packages')
+site.addsitedir(venv_root + '/lib/python3.6/site-packages')
 
 # Add the app's directory to the PYTHONPATH
 sys.path.append(BASE_DIR)
