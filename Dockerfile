@@ -4,6 +4,8 @@ MAINTAINER ian.tibble@netdelta.io
 
 ARG SITE
 ENV SITE ${SITE:-default}
+ARG PORT
+ENV PORT ${PORT:-8000}
 ENV DEBIAN_FRONTEND noninteractive
 ENV LETSENCRYPT_HOME /etc/letsencrypt
 
@@ -67,7 +69,7 @@ RUN echo "ServerName localhost" >> /etc/apache2/conf-enabled/hostname.conf && \
 
 # Stuff
 # Port to expose
-EXPOSE 80 443 8000
+EXPOSE 80 443 ${PORT}
 #CMD service mysql start && tail -F /var/log/mysql/error.log
 RUN mkdir -pv /srv/netdelta
 
