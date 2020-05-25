@@ -34,7 +34,7 @@ RUN echo $WEBMASTER_MAIL > /etc/container_environment/WEBMASTER_MAIL && \
 RUN apt-get -y update && \
     apt-get install -q -y curl apache2 && \
     apt-get install -q -y apt-utils python3.6 python3-pip python3.6-dev mysql-client net-tools rsync python-mysqldb rabbitmq-server && \
-    apt-get install -q -y nmap postfix python3-venv apache2-dev netcat-openbsd vim openssh-server ntpdate
+    apt-get install -q -y nmap postfix phpmyadmin python3-venv apache2-dev netcat-openbsd vim openssh-server ntpdate
 
 RUN apt-get -y install software-properties-common
 RUN add-apt-repository ppa:certbot/certbot
@@ -72,6 +72,7 @@ RUN echo "ServerName localhost" >> /etc/apache2/conf-enabled/hostname.conf && \
 EXPOSE 80 443 ${PORT}
 #CMD service mysql start && tail -F /var/log/mysql/error.log
 RUN mkdir -pv /srv/netdelta
+RUN mkdir -pv /srv/${SITE}/logs
 
 COPY $DOCKYARD_SRC $DOCKYARD_STAGING
 COPY $DOCKYARD_CONFIG $DOCKYARD_STAGING
@@ -86,5 +87,5 @@ RUN $VENVDIR/bin/pip3 install wheel
 RUN $VENVDIR/bin/pip3 install -r $VENVDIR/requirements.txt
 
 #COPY ./run_netdelta.sh /srv/staging
-VOLUME [ "$LETSENCRYPT_HOME", "/etc/apache2/sites-available", "/var/log/apache2", "/srv/netdelta"]
+VOLUME [ "$LETSENCRYPT_HOME", "/var/lib/mysql", "/srv/netdelta", "/srv/logs"]
 ENTRYPOINT ["/srv/staging/config/run_web.sh"]

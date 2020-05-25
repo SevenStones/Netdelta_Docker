@@ -27,6 +27,7 @@ DEBUG = False
 ADMINS = [('admin', 'ian.tibble@netdelta.io')]
 
 SITE_NAME = "SITENAME"
+LOG_DIR = "/srv/logs/" + SITE_NAME
 
 # Application definition
 

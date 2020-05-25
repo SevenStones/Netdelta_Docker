@@ -21,6 +21,7 @@ MYSQL_DIR="${VENV_ROOT}/lib/python3.6/site-packages/django/db/backends/mysql"
 LIBNMAP_DIR="${VENV_ROOT}/lib/python3.6/site-packages/libnmap"
 SITE_ROOT="/srv"
 CONFIG_ROOT="/srv/staging/config"
+LOG_ROOT=${SITE_ROOT}/logs/$1
 
 function patch_MySQL_base(){
   echo "Applying patch for base.py (MySQL Django framework)"
@@ -55,7 +56,6 @@ function patch_libnmap(){
 }
 
 
-#mkdir -pv /srv/netdelta
 echo "Adjusting mysql filesystem permissions"
 chown -R mysql:mysql /var/lib/mysql
 
@@ -64,7 +64,6 @@ useradd -s /bin/bash -d /home/iantibble -m iantibble
 groupadd web
 usermod -G web iantibble
 usermod -G web www-data
-#mkdir /var/www
 chown -R www-data:web /var/www
 chown -R iantibble:web /srv/netdelta
 chown -R iantibble:web /srv/staging
@@ -73,46 +72,22 @@ chown -R iantibble:web /srv/staging
 echo "sleeping 10"
 sleep 10
 service mysql start
-service rabbitmq-server start
+#service rabbitmq-server start
 mysql -e "CREATE DATABASE IF NOT EXISTS netdelta_$1 CHARACTER SET utf8 COLLATE utf8_unicode_ci;" --user=root --password=ankSQL4r4
 
 echo "Setting up Django and Apache Logs"
-mkdir -v ${SITE_ROOT}/netdelta/logs
-touch ${SITE_ROOT}/netdelta/logs/netdelta.json
-touch ${SITE_ROOT}/netdelta/logs/debug.json
-touch ${SITE_ROOT}/netdelta/logs/crash.log
-touch ${SITE_ROOT}/netdelta/logs/celery.log
-chown -R iantibble:web ${SITE_ROOT}/netdelta/logs
-chmod -R 775 ${SITE_ROOT}/netdelta/logs
+mkdir -v ${LOG_ROOT}
+touch ${LOG_ROOT}/netdelta.json
+touch ${LOG_ROOT}/debug.json
+touch ${LOG_ROOT}/crash.log
+touch ${LOG_ROOT}/celery.log
+touch ${LOG_ROOT}/celery-monitor.log
+chown -R iantibble:web ${LOG_ROOT}
+chmod -R 775 ${LOG_ROOT}
 mkdir -pv /var/www/html/$1
-
-
-#certbot -n --expand --apache --agree-tos --email $WEBMASTER_MAIL --domains $DOMAINS
-# -------Setting letsencrypt certs where we already have the certs issued
-#if [ "$2" == "le" ]
-#then
-#	echo "will configure letsencrypt certs"
-#	a2dissite crosskey-django.conf
-#	a2ensite crosskey-django-le.conf
-#fi
-
-# -------Setting netdelta Django project environment
-#cd /srv || { echo "directory /srv does not exist"; exit 1; }
-#echo "starting project netdelta"
-#su -m iantibble -c "$VENV_ROOT/bin/django-admin startproject netdelta"
-##django-admin startproject netdelta
-#
-#echo "starting app nd"
-#su -m iantibble -c "$VENV_ROOT/bin/django-admin startapp nd"
-##django-admin startapp nd
 
 echo "Syncing code base and tools"
 rsync -azrlv --exclude-from=$CONFIG_ROOT/deploy-excludes.txt /srv/staging/ /srv/
-
-#echo "Installing pip requirements"
-#pip3 install wheel
-#pip3 install -r /srv/staging/netdelta/requirements.txt
-
 
 echo "Patching virtualenv"
 patch_MySQL_base
@@ -130,7 +105,11 @@ echo "Adjusting listening ports for Apache"
 cp -v $CONFIG_ROOT/ports.conf /etc/apache2/ports.conf
 sed -i -E "s/PORT/$2/g" /etc/apache2/ports.conf
 
-
+echo "Enabling celery monitor init service"
+cp -v $CONFIG_ROOT/celery-monitor.bash /etc/init.d
+mv -v /etc/init.d/celery-monitor.bash /etc/init.d/celery-monitor
+chmod -v 700 /etc/init.d/celery-monitor
+update-rc.d celery-monitor defaults
 
 echo "netdelta database tables setup"
 cd /srv/netdelta || { echo "directory /srv/netdelta does not exist"; exit 1; }
@@ -160,7 +139,7 @@ if [ "$3" == "le" ]; then
   echo "Letsencrypt operations"
   mkdir -v /etc/letsencrypt
   cp -v $CONFIG_ROOT/options-ssl-apache.conf /etc/letsencrypt
-  sed -i -E "s/<\/VirtualHost>//g" /etc/apache2/sites-available/$1.conf
+  sed -i -E "s/<\/VirtualHost>/g" /etc/apache2/sites-available/$1.conf
   cat $CONFIG_ROOT/letsencrypt-apache2.conf >> /etc/apache2/sites-available/$1.conf
   sed -i -E "s/SITE/$1/g" /etc/apache2/sites-available/$1.conf
   mkdir -pv /etc/letsencrypt/live/$1.netdelta.io
@@ -176,7 +155,8 @@ echo "enabling site"
 a2ensite $1.conf
 
 service apache2 restart
+service apache2 stop
 
 # start celery worker
-su -m iantibble -c "${VENV_ROOT}/bin/celery worker -E -A nd -n $1 -Q $1 --loglevel=info -B --logfile=${SITE_ROOT}/netdelta/logs/celery.log"
+su -m iantibble -c "${VENV_ROOT}/bin/celery worker -E -A nd -n $1 -Q $1 --loglevel=info -B --logfile=${LOG_ROOT}/celery.log"
 tail -f /dev/null
