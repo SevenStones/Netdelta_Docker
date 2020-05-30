@@ -34,17 +34,17 @@ RUN echo $WEBMASTER_MAIL > /etc/container_environment/WEBMASTER_MAIL && \
 RUN apt-get -y update && \
     apt-get install -q -y curl apache2 && \
     apt-get install -q -y apt-utils python3.6 python3-pip python3.6-dev mysql-client net-tools rsync python-mysqldb rabbitmq-server && \
-    apt-get install -q -y nmap postfix phpmyadmin python3-venv apache2-dev netcat-openbsd vim openssh-server ntpdate
+    apt-get install -q -y nmap postfix phpmyadmin iputils-ping python3-venv apache2-dev netcat-openbsd vim openssh-server ntpdate
 
 RUN apt-get -y install software-properties-common
 RUN add-apt-repository ppa:certbot/certbot
 RUN apt-get install -y python-certbot-apache
 
-RUN apt-get install -y debconf-utils && \
-    echo mysql-server mysql-server/root_password password ankSQL4r4 | debconf-set-selections && \
-    echo mysql-server mysql-server/root_password_again password ankSQL4r4 | debconf-set-selections && \
-    apt-get install -y mysql-server -o pkg::Options::="--force-confdef" -o pkg::Options::="--force-confold" --fix-missing && \
-    apt-get clean 
+#RUN apt-get install -y debconf-utils && \
+#    echo mysql-server mysql-server/root_password password ankSQL4r4 | debconf-set-selections && \
+#    echo mysql-server mysql-server/root_password_again password ankSQL4r4 | debconf-set-selections && \
+#    apt-get install -y mysql-server -o pkg::Options::="--force-confdef" -o pkg::Options::="--force-confold" --fix-missing && \
+#    apt-get clean
 
 RUN apt-get remove -y python3-dev
 
@@ -87,5 +87,5 @@ RUN $VENVDIR/bin/pip3 install wheel
 RUN $VENVDIR/bin/pip3 install -r $VENVDIR/requirements.txt
 
 #COPY ./run_netdelta.sh /srv/staging
-VOLUME [ "$LETSENCRYPT_HOME", "/var/lib/mysql", "/srv/netdelta", "/srv/logs"]
+VOLUME [ "$LETSENCRYPT_HOME", "/srv/netdelta", "/srv/logs"]
 ENTRYPOINT ["/srv/staging/config/run_web.sh"]

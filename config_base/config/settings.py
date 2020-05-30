@@ -85,6 +85,8 @@ DATABASES = {
         'NAME': 'netdelta_SITENAME',                  # Not used with sqlite3.
         'USER': 'root',                      # Not used with sqlite3.
         'PASSWORD': 'ankSQL4r4',
+        'HOST': 'mysql_netdelta',
+        'PORT': 3306,
         'OPTIONS': dict(init_command="SET sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER'"),
     }
 }

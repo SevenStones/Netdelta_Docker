@@ -1,0 +1,21 @@
+FROM ubuntu:18.04
+MAINTAINER ian.tibble@netdelta.io 
+
+ENV DEBIAN_FRONTEND noninteractive
+
+# Base setup
+# ADD resources/etc/apt/ /etc/apt/
+RUN apt-get -y update
+RUN apt-get install -q -y mysql-client apt-utils rsync net-tools vim nmap
+
+RUN apt-get install -y debconf-utils && \
+    echo mysql-server mysql-server/root_password password ankSQL4r4 | debconf-set-selections && \
+    echo mysql-server mysql-server/root_password_again password ankSQL4r4 | debconf-set-selections && \
+    apt-get install -y mysql-server -o pkg::Options::="--force-confdef" -o pkg::Options::="--force-confold" --fix-missing && \
+    apt-get clean
+
+EXPOSE 3306
+
+COPY run_mysql.sh /srv
+VOLUME ["/var/lib/mysql"]
+ENTRYPOINT ["/srv/run_mysql.sh"]

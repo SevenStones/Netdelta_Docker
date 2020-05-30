@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ "$#" -lt 2 ]; then
-  echo "Missing parameters; $1 - site name; $2 - Apache port; [$3 - le]"
+if [ "$#" -lt 1 ]; then
+  echo "Missing parameters; $1 - site name ]"
   exit 1
 fi
 
@@ -22,7 +22,6 @@ LIBNMAP_DIR="${VENV_ROOT}/lib/python3.6/site-packages/libnmap"
 SITE_ROOT="/srv"
 CONFIG_ROOT="/srv/staging/config"
 LOG_ROOT=${SITE_ROOT}/logs/$1
-
 function patch_MySQL_base(){
   echo "Applying patch for base.py (MySQL Django framework)"
   cp -v ${MYSQL_DIR}/base.py ${MYSQL_DIR}/base.orig
@@ -56,29 +55,31 @@ function patch_libnmap(){
 }
 
 
-echo "Adjusting mysql filesystem permissions"
-chown -R mysql:mysql /var/lib/mysql
+#echo "Adjusting mysql filesystem permissions"
+#chown -R mysql:mysql /var/lib/mysql
 
 echo "Non-root users and groups config"
-useradd -s /bin/bash -d /home/iantibble -m iantibble
+useradd -s /bin/bash -d /home/iantibble -u 1000 -m iantibble
 groupadd web
+groupmod -g 1001 web
 usermod -G web iantibble
 usermod -G web www-data
 chown -R www-data:web /var/www
 chown -R iantibble:web /srv/netdelta
 chown -R iantibble:web /srv/staging
 
-
 echo "sleeping 10"
 sleep 10
-service mysql start
-#service rabbitmq-server start
-mysql -e "CREATE DATABASE IF NOT EXISTS netdelta_$1 CHARACTER SET utf8 COLLATE utf8_unicode_ci;" --user=root --password=ankSQL4r4
+#service mysql start
+service rabbitmq-server start
+echo "setting up database: netdelta_$1"
+mysql -e "CREATE DATABASE IF NOT EXISTS netdelta_$1 CHARACTER SET utf8 COLLATE utf8_unicode_ci;" --user=root --password=ankSQL4r4 -h 127.0.0.1 -p 3306
 
 echo "Setting up Django and Apache Logs"
 mkdir -v ${LOG_ROOT}
 touch ${LOG_ROOT}/netdelta.json
 touch ${LOG_ROOT}/debug.json
+touch ${LOG_ROOT}/request.json
 touch ${LOG_ROOT}/crash.log
 touch ${LOG_ROOT}/celery.log
 touch ${LOG_ROOT}/celery-monitor.log
@@ -148,14 +149,14 @@ if [ "$3" == "le" ]; then
   chmod -v 600 /etc/letsencrypt/live/$1.netdelta.io/privkey.pem
 fi
 
-echo "Adjusting filesystem permissions"
-$CONFIG_ROOT/fixperms.bash
-
 echo "enabling site"
 a2ensite $1.conf
 
 service apache2 restart
 service apache2 stop
+
+echo "Adjusting filesystem permissions"
+$CONFIG_ROOT/fixperms.bash
 
 # start celery worker
 su -m iantibble -c "${VENV_ROOT}/bin/celery worker -E -A nd -n $1 -Q $1 --loglevel=info -B --logfile=${LOG_ROOT}/celery.log"
