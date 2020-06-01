@@ -30,6 +30,12 @@ is_running() {
 
 start() {
 
+  Z=$(is_running)
+  if [ "$Z" != "" ]; then
+    echo "Celery is already active"
+    exit 0
+  fi
+
   su -m iantibble -c "${VIRTUALENV_DIR}/bin/python3 $PROG &"
   Z=$(is_running)
   if [ "$Z" != "" ]; then
@@ -45,7 +51,7 @@ stop (){
 
   Z=$(is_running)
 
-  if [ "$Z" != "" ]; then
+  if [ "$Z" == "" ]; then
     kill -9 $Z
     if [ "$?" -eq 0 ]; then
       echo -e "Celery-monitor shutdown successful: [${GREEN}OK${NC}]"

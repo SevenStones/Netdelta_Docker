@@ -73,7 +73,7 @@ sleep 10
 #service mysql start
 service rabbitmq-server start
 echo "setting up database: netdelta_$1"
-mysql -e "CREATE DATABASE IF NOT EXISTS netdelta_$1 CHARACTER SET utf8 COLLATE utf8_unicode_ci;" --user=root --password=ankSQL4r4 -h 127.0.0.1 -p 3306
+mysql -e "CREATE DATABASE IF NOT EXISTS netdelta_$1 CHARACTER SET utf8 COLLATE utf8_unicode_ci;" --user=root --password='ankSQL4r4' -h mysql_netdelta
 
 echo "Setting up Django and Apache Logs"
 mkdir -v ${LOG_ROOT}
@@ -111,6 +111,12 @@ cp -v $CONFIG_ROOT/celery-monitor.bash /etc/init.d
 mv -v /etc/init.d/celery-monitor.bash /etc/init.d/celery-monitor
 chmod -v 700 /etc/init.d/celery-monitor
 update-rc.d celery-monitor defaults
+
+echo "Enabling celery worker init service"
+cp -v $CONFIG_ROOT/celery.bash /etc/init.d
+mv -v /etc/init.d/celery.bash /etc/init.d/celery
+chmod -v 700 /etc/init.d/celery
+update-rc.d celery defaults
 
 echo "netdelta database tables setup"
 cd /srv/netdelta || { echo "directory /srv/netdelta does not exist"; exit 1; }
@@ -159,5 +165,5 @@ echo "Adjusting filesystem permissions"
 $CONFIG_ROOT/fixperms.bash
 
 # start celery worker
-su -m iantibble -c "${VENV_ROOT}/bin/celery worker -E -A nd -n $1 -Q $1 --loglevel=info -B --logfile=${LOG_ROOT}/celery.log"
+service celery start
 tail -f /dev/null
