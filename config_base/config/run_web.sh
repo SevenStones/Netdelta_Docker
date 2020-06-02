@@ -115,6 +115,7 @@ update-rc.d celery-monitor defaults
 echo "Enabling celery worker init service"
 cp -v $CONFIG_ROOT/celery.bash /etc/init.d
 mv -v /etc/init.d/celery.bash /etc/init.d/celery
+sed -i -E "s/SITE/$1/g" /etc/init.d/celery
 chmod -v 700 /etc/init.d/celery
 update-rc.d celery defaults
 
@@ -139,6 +140,7 @@ cat $CONFIG_ROOT/apache2-conf-add-on.txt >> /etc/apache2/apache2.conf
 echo -e "Adjusting Apache site files for $1.conf"
 cp -v $CONFIG_ROOT/new.conf /etc/apache2/sites-available
 mv -v /etc/apache2/sites-available/new.conf /etc/apache2/sites-available/$1.conf
+echo "completing Apache site operation - phase 2"
 sed -i -E "s/SITE/$1/g" /etc/apache2/sites-available/$1.conf
 sed -i -E "s/PORT/$2/g" /etc/apache2/sites-available/$1.conf
 
@@ -146,7 +148,7 @@ if [ "$3" == "le" ]; then
   echo "Letsencrypt operations"
   mkdir -v /etc/letsencrypt
   cp -v $CONFIG_ROOT/options-ssl-apache.conf /etc/letsencrypt
-  sed -i -E "s/<\/VirtualHost>/g" /etc/apache2/sites-available/$1.conf
+  sed -i -E "s/<\/VirtualHost>//g" /etc/apache2/sites-available/$1.conf
   cat $CONFIG_ROOT/letsencrypt-apache2.conf >> /etc/apache2/sites-available/$1.conf
   sed -i -E "s/SITE/$1/g" /etc/apache2/sites-available/$1.conf
   mkdir -pv /etc/letsencrypt/live/$1.netdelta.io
@@ -165,5 +167,5 @@ echo "Adjusting filesystem permissions"
 $CONFIG_ROOT/fixperms.bash
 
 # start celery worker
-service celery start
-tail -f /dev/null
+#service celery start
+#tail -f /dev/null

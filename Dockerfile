@@ -19,14 +19,6 @@ ENV DOCKYARD_SRVPROJ=/srv/netdelta
 ENV DOCKYARD_STAGING=/srv/staging
 ENV VENVDIR=/srv/netdelta304
 
-ENV DOMAINS "${SITE}.netdelta.io"
-
-# Manually set the apache environment variables in order to get apache to work immediately.
-RUN mkdir -p /etc/container_environment
-RUN echo $WEBMASTER_MAIL > /etc/container_environment/WEBMASTER_MAIL && \
-    echo $DOMAINS > /etc/container_environment/DOMAINS && \
-    echo $LETSENCRYPT_HOME > /etc/container_environment/LETSENCRYPT_HOME
-
 #CMD ["/sbin/my_init"]
 
 # Base setup
@@ -87,5 +79,5 @@ RUN $VENVDIR/bin/pip3 install wheel
 RUN $VENVDIR/bin/pip3 install -r $VENVDIR/requirements.txt
 
 #COPY ./run_netdelta.sh /srv/staging
-VOLUME [ "$LETSENCRYPT_HOME", "/srv/netdelta", "/srv/logs"]
+VOLUME ["/srv/netdelta", "/srv/logs"]
 ENTRYPOINT ["/srv/staging/config/run_web.sh"]

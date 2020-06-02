@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 NC='\033[0m' # No Color
+GREEN='\033[0;32m'
 SITE_ROOT="/srv"
 PROG="${SITE_ROOT}/netdelta/celery-monitor.py"
 VIRTUALENV_DIR="/srv/netdelta304"

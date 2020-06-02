@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-NC='\033[0m' # No Color
+
 SITE_ROOT="/srv"
 NETDELTA_ROOT="${SITE_ROOT}/netdelta"
 VIRTUALENV_DIR="${SITE_ROOT}/netdelta304"
@@ -44,8 +44,8 @@ start() {
   fi
 
   cd ${NETDELTA_ROOT} || (echo "Netdelta root directory not found; exit 1;")
-  echo ${PROG}
-  su -m iantibble -c "${PROG} worker -E -A nd -n barbican -Q barbican --loglevel=info -B --logfile=${LOGS_ROOT}/barbican/celery.log 1>/dev/null&"
+
+  su -m iantibble -c "${PROG} worker -E -A nd -n SITE -Q SITE --loglevel=info -B --logfile=${LOGS_ROOT}/SITE/celery.log 1>/dev/null&"
   Z=$(is_running)
   if [ "$Z" != "" ]; then
     echo -e "Celery worker launched successfully : [${GREEN}OK${NC}]"
