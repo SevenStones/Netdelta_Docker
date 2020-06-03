@@ -29,12 +29,13 @@ cd ${DOCKER_DIR} || (echo "Dockerfile not found, directory does not exist"; exit
 
 echo "initial build"
 docker build -t netdelta/$1:core --build-arg SITE=$1 --build-arg PORT=$2 . 1>> ${RUN_LOG_FILE}
-if [ "$?" == 0 ]; then
+if [ "$(docker images -q netdelta/$1:core)" ]; then
   echo -e "docker build of netdelta/$1:core image reported no errors: [${GREEN}OK${NC}]"
   docker images
   echo
 else
   echo "docker build of netdelta/$1:core image failed"
+  exit 1
 fi
 
 if [ "$3" == "le" ]; then
@@ -44,24 +45,27 @@ else
   docker run -it -p $2:$2 --name netdelta_$1 --network netdelta_net -v netdelta_app:/srv/netdelta -v \
 netdelta_logs:/srv/logs netdelta/$1:core $1 $2 1>> ${RUN_LOG_FILE}
 fi
-wait
-if [ "$?" == 0 ]; then
+echo "sleeping 10"
+sleep 10
+if [ "$(docker ps -a | grep -w netdelta_$1'$' | grep -v grep)" ]; then
   echo -e "docker run of netdelta/$1:core image reported no errors: [${GREEN}OK${NC}]"
   docker ps -a
   echo
 else
   echo "docker run of netdelta/$1:core image failed"
+  exit 1
 fi
 
 echo "docker commit to generate netdelta/$1:actual image"
 docker commit --change='ENTRYPOINT ["/srv/staging/config/run_netdelta.sh"]' netdelta_$1 netdelta/$1:actual 1>> ${RUN_LOG_FILE}
 
-if [ "$?" == 0 ]; then
+if [ "$(docker images -q netdelta/$1:actual)" ]; then
   echo -e "docker commit of netdelta/$1:core image reported no errors: [${GREEN}OK${NC}]"
   docker images
   echo
 else
   echo "docker commit of netdelta/$1:core image failed"
+  exit
 fi
 
 echo "docker stop netdelta_$1"
@@ -73,8 +77,9 @@ docker rm netdelta_$1 1>/dev/null
 echo "final run"
 docker run -itd -p $2:$2 --network netdelta_net --name netdelta_$1 -v netdelta_app:/srv/netdelta \
 -v netdelta_logs:/srv/logs netdelta/$1:actual $1 1>> ${RUN_LOG_FILE}
-wait
-if [ "$?" == 0 ]; then
+echo "sleeping 10"
+sleep 10
+if [ "$(docker ps -a | grep -w netdelta_$1'$' | grep -v grep)" ]; then
   echo -e "docker run of netdelta/$1:actual image reported no errors: [${GREEN}OK${NC}]"
   docker ps -a
   echo
