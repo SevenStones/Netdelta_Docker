@@ -7,9 +7,7 @@ ENV SITE ${SITE:-default}
 ARG PORT
 ENV PORT ${PORT:-8000}
 ENV DEBIAN_FRONTEND noninteractive
-ENV LETSENCRYPT_HOME /etc/letsencrypt
 
-ENV WEBMASTER_MAIL "ian.tibble@netdelta.io"
 ENV DOCKYARD_SRC=nd_base
 ENV DOCKYARD_CONFIG=config_base
 # Directory in container for all project files
@@ -17,6 +15,7 @@ ENV DOCKYARD_SRVHOME=/srv
 # Directory in container for project source files
 ENV DOCKYARD_SRVPROJ=/srv/netdelta
 ENV DOCKYARD_STAGING=/srv/staging
+ENV CONFIG_BASE=/srv/config_base
 ENV VENVDIR=/srv/netdelta304
 
 #CMD ["/sbin/my_init"]
@@ -63,15 +62,16 @@ RUN echo "ServerName localhost" >> /etc/apache2/conf-enabled/hostname.conf && \
 # Port to expose
 EXPOSE 80 443 ${PORT}
 #CMD service mysql start && tail -F /var/log/mysql/error.log
-RUN mkdir -pv /srv/netdelta
-RUN mkdir -pv /srv/${SITE}/logs
+RUN mkdir -pv /srv/staging
+RUN mkdir -pv /srv/logs/${SITE}
+RUN mkdir -pv /data
 
-COPY $DOCKYARD_SRC $DOCKYARD_STAGING
-COPY $DOCKYARD_CONFIG $DOCKYARD_STAGING
 
+COPY $DOCKYARD_CONFIG $CONFIG_BASE
+
+COPY $DOCKYARD_CONFIG/config/run_web.sh /srv
 
 RUN cd /srv && python3 -m venv netdelta304
-RUN chmod 755 $VENVDIR/bin/activate
 
 COPY $DOCKYARD_CONFIG/config/requirements.txt $VENVDIR
 
@@ -79,5 +79,5 @@ RUN $VENVDIR/bin/pip3 install wheel
 RUN $VENVDIR/bin/pip3 install -r $VENVDIR/requirements.txt
 
 #COPY ./run_netdelta.sh /srv/staging
-VOLUME ["/srv/netdelta", "/srv/logs"]
-ENTRYPOINT ["/srv/staging/config/run_web.sh"]
+VOLUME ["/etc/letsencrypt","/srv/staging", "/srv/logs", "/data"]
+ENTRYPOINT ["/srv/run_web.sh"]

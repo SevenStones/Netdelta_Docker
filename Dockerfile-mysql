@@ -15,7 +15,7 @@ RUN apt-get install -y debconf-utils && \
     apt-get clean
 
 EXPOSE 3306
-
+RUN mkdir -pv /data
 COPY run_mysql.sh /srv
-VOLUME ["/var/lib/mysql"]
+VOLUME ["/var/lib/mysql", "/data"]
 ENTRYPOINT ["/srv/run_mysql.sh"]

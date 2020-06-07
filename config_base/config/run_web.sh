@@ -12,16 +12,23 @@ fi
 
 [[ "$#" -eq 3 ]] && [ "$3" != "le" ] && { echo "Invalid options: usage - run_web.sh site port [le]"; exit 1; }
 
-DOMAIN="$1.netdelta.io"
-WEBMASTER_MAIL="ian.tibble@netdelta.io"
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 VENV_ROOT="/srv/netdelta304"
 MYSQL_DIR="${VENV_ROOT}/lib/python3.6/site-packages/django/db/backends/mysql"
 LIBNMAP_DIR="${VENV_ROOT}/lib/python3.6/site-packages/libnmap"
-SITE_ROOT="/srv"
-CONFIG_ROOT="/srv/staging/config"
-LOG_ROOT=${SITE_ROOT}/logs/$1
+SITE_STAGING_ROOT="/srv/staging"
+NETDELTA_ROOT="/srv/netdelta"
+CONFIG_ROOT="/srv/config_base/config"
+LOG_ROOT="/srv/logs/$1"
+
+echo "staging base"
+ls -la /srv/staging
+echo "config base"
+ls -la /srv/config_base
+
+[ ! -d "/srv/staging/netdelta" ] && (echo "looks like Netdelta hasn't been sync'd with the file server yet; exiting"; exit 1;)
+
 function patch_MySQL_base(){
   echo "Applying patch for base.py (MySQL Django framework)"
   cp -v ${MYSQL_DIR}/base.py ${MYSQL_DIR}/base.orig
@@ -54,9 +61,10 @@ function patch_libnmap(){
   fi
 }
 
-
 #echo "Adjusting mysql filesystem permissions"
 #chown -R mysql:mysql /var/lib/mysql
+
+
 
 echo "Non-root users and groups config"
 useradd -s /bin/bash -d /home/iantibble -u 1000 -m iantibble
@@ -65,18 +73,19 @@ groupmod -g 1001 web
 usermod -G web iantibble
 usermod -G web www-data
 chown -R www-data:web /var/www
-chown -R iantibble:web /srv/netdelta
 chown -R iantibble:web /srv/staging
+
+echo "listing site root|"
+ls -la ${SITE_STAGING_ROOT}
 
 echo "sleeping 10"
 sleep 10
-#service mysql start
-service rabbitmq-server start
+
 echo "setting up database: netdelta_$1"
 mysql -e "CREATE DATABASE IF NOT EXISTS netdelta_$1 CHARACTER SET utf8 COLLATE utf8_unicode_ci;" --user=root --password='ankSQL4r4' -h mysql_netdelta
 
 echo "Setting up Django and Apache Logs"
-mkdir -v ${LOG_ROOT}
+mkdir -vp ${LOG_ROOT}
 touch ${LOG_ROOT}/netdelta.json
 touch ${LOG_ROOT}/debug.json
 touch ${LOG_ROOT}/request.json
@@ -88,15 +97,18 @@ chmod -R 775 ${LOG_ROOT}
 mkdir -pv /var/www/html/$1
 
 echo "Syncing code base and tools"
-rsync -azrlv --exclude-from=$CONFIG_ROOT/deploy-excludes.txt /srv/staging/ /srv/
+rsync -azrlv --exclude-from=$CONFIG_ROOT/deploy-excludes.txt /srv/staging/netdelta/ ${NETDELTA_ROOT}/
+
+echo "listing /srv/netdelta after syncing"
+ls -la /srv/netdelta
 
 echo "Patching virtualenv"
 patch_MySQL_base
 patch_libnmap
 
 echo "Adjusting settings.py database name"
-cp -v $CONFIG_ROOT/settings.py ${SITE_ROOT}/netdelta/netdelta
-sed -i -E "s/SITENAME/$1/g" ${SITE_ROOT}/netdelta/netdelta/settings.py
+cp -v $CONFIG_ROOT/settings.py ${NETDELTA_ROOT}/netdelta/
+sed -i -E "s/SITENAME/$1/g" ${NETDELTA_ROOT}/netdelta/settings.py
 
 echo "Adjusting filesystem permissions"
 $CONFIG_ROOT/fixperms.bash
@@ -120,7 +132,7 @@ chmod -v 700 /etc/init.d/celery
 update-rc.d celery defaults
 
 echo "netdelta database tables setup"
-cd /srv/netdelta || { echo "directory /srv/netdelta does not exist"; exit 1; }
+cd ${NETDELTA_ROOT} || { echo "directory $NETDELTA_ROOT does not exist"; exit 1; }
 su -m iantibble -c "$VENV_ROOT/bin/python3 manage.py makemigrations nd"
 # migrate db, so we have the latest db schema
 su -m iantibble -c "$VENV_ROOT/bin/python3 manage.py migrate"
@@ -129,7 +141,7 @@ echo "Setting Django admin password"
 echo "from django.contrib.auth.models import User; User.objects.filter(email='itibble@gmail.com').delete();User.objects.create_superuser('admin', 'itibble@gmail.com', 'octl1912')" | $VENV_ROOT/bin/python3 manage.py shell
 
 echo "Adjusting wsgi.py"
-cp -v $CONFIG_ROOT/wsgi.py ${SITE_ROOT}/netdelta/netdelta
+cp -v $CONFIG_ROOT/wsgi.py ${NETDELTA_ROOT}/netdelta
 
 echo "Removing mod_wsgi Apache module - just to make sure, will flag an error probably"
 a2dismod mod_wsgi
