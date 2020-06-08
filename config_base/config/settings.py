@@ -193,6 +193,15 @@ ALERTS_SUBJECT = 'NetDelta Found'
 ALERT_ON_UNRESPONSIVE = 'True'
 ALERT_ON_REMOVED_SERVICE = 'True'
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = '25'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = False
+
+
 IGNORE_TCP_WRAPPED = False
 
 IGNORE_SERVICE_SCAN_TIMEOUTS = 'True'

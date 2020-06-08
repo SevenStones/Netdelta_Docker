@@ -9,5 +9,6 @@ service rabbitmq-server start
 service apache2 start
 service celery-monitor start
 service celery start
+service postfix start
 
 tail -f /dev/null

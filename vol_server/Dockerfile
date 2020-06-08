@@ -15,6 +15,7 @@ RUN mkdir /logs
 RUN mkdir /srv/staging
 RUN mkdir /le
 RUN mkdir /data
+RUN mkdir /netdelta304
 RUN useradd -s /bin/bash -d /home/iantibble -u 1000 -m iantibble
 RUN groupadd -g 112 mysql
 RUN useradd -u 108 -g 112 mysql
@@ -30,5 +31,5 @@ RUN ls -laR $DOCKYARD_STAGING
 EXPOSE 9600 80 443 22
 
 #COPY ./run_netdelta.sh /srv/staging
-VOLUME ["/srv/staging", "/logs", "/le", "/data"]
+VOLUME ["/srv/staging", "/logs", "/le", "/data", "/srv/netdelta304"]
 ENTRYPOINT ["/srv/volumes_server.bash"]
