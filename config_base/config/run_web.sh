@@ -14,7 +14,7 @@ fi
 
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
-VENV_ROOT="/srv/netdelta304"
+VENV_ROOT="/srv/netdelta_venv"
 MYSQL_DIR="${VENV_ROOT}/lib/python3.6/site-packages/django/db/backends/mysql"
 LIBNMAP_DIR="${VENV_ROOT}/lib/python3.6/site-packages/libnmap"
 SITE_STAGING_ROOT="/srv/staging"

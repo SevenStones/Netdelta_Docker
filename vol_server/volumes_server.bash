@@ -7,6 +7,7 @@ groupadd web
 groupmod -g 1001 web
 usermod -G web iantibble
 chown -Rv iantibble:web /logs
-chown -Rv iantibble:web /netdelta
+chown -Rv iantibble:web /srv/staging
+chown -Rv iantibble:web /srv/netdelta_venv
 
 tail -f /dev/null 

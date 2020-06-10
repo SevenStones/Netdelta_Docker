@@ -43,10 +43,10 @@ fi
 
 if [ "$3" == "le" ]; then
   docker run -it -p $2:$2 --name netdelta_$1 --network netdelta_net -v netdelta_app:/srv/staging -v \
-netdelta_logs:/srv/logs -v le:/etc/letsencrypt -v data:/data netdelta/$1:core $1 $2 le 1>> ${RUN_LOG_FILE}
+netdelta_logs:/srv/logs -v le:/etc/letsencrypt -v data:/data -v netdelta_venv:/srv/netdelta_venv netdelta/$1:core $1 $2 le 1>> ${RUN_LOG_FILE}
 else
   docker run -it -p $2:$2 --name netdelta_$1 --network netdelta_net -v netdelta_app:/srv/staging -v \
-netdelta_logs:/srv/logs -v le:/etc/letsencrypt -v data:/data netdelta/$1:core $1 $2 1>> ${RUN_LOG_FILE}
+netdelta_logs:/srv/logs -v le:/etc/letsencrypt -v data:/data -v netdelta_venv:/srv/netdelta_venv netdelta/$1:core $1 $2 1>> ${RUN_LOG_FILE}
 fi
 echo "sleeping 10"
 sleep 10
@@ -79,7 +79,7 @@ docker rm netdelta_$1 1>/dev/null
 
 echo "final run"
 docker run -itd -p $2:$2 --name netdelta_$1 --network netdelta_net -v netdelta_app:/srv/staging -v \
-netdelta_logs:/srv/logs -v data:/data -v le:/etc/letsencrypt netdelta/$1:actual $1 1>> ${RUN_LOG_FILE}
+netdelta_logs:/srv/logs -v data:/data -v le:/etc/letsencrypt -v netdelta_venv:/srv/netdelta_venv netdelta/$1:actual $1 1>> ${RUN_LOG_FILE}
 echo "sleeping 10"
 sleep 10
 if [ "$(docker ps -a | grep -w netdelta_$1'$' | grep -v grep)" ]; then

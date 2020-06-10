@@ -16,7 +16,7 @@ ENV DOCKYARD_SRVHOME=/srv
 ENV DOCKYARD_SRVPROJ=/srv/netdelta
 ENV DOCKYARD_STAGING=/srv/staging
 ENV CONFIG_BASE=/srv/config_base
-ENV VENVDIR=/srv/netdelta304
+ENV VENVDIR=/srv/netdelta_venv
 
 #CMD ["/sbin/my_init"]
 
@@ -71,7 +71,7 @@ COPY $DOCKYARD_CONFIG $CONFIG_BASE
 
 COPY $DOCKYARD_CONFIG/config/run_web.sh /srv
 
-RUN cd /srv && python3 -m venv netdelta304
+RUN cd /srv && python3 -m venv netdelta_venv
 
 COPY $DOCKYARD_CONFIG/config/requirements.txt $VENVDIR
 
@@ -79,5 +79,5 @@ RUN $VENVDIR/bin/pip3 install wheel
 RUN $VENVDIR/bin/pip3 install -r $VENVDIR/requirements.txt
 
 #COPY ./run_netdelta.sh /srv/staging
-VOLUME ["/etc/letsencrypt","/srv/staging", "/srv/logs", "/data"]
+VOLUME ["/etc/letsencrypt","/srv/staging", "/srv/logs", "/data", "/srv/netdelta_venv"]
 ENTRYPOINT ["/srv/run_web.sh"]
