@@ -11,7 +11,7 @@ import sys
 import site
 
 BASE_DIR = "/srv/netdelta"
-venv_root = "/srv/netdelta304"
+venv_root = "/srv/netdelta_venv"
 
 # Add the site-packages of the chosen virtualenv to work with
 site.addsitedir(venv_root + '/lib/python3.6/site-packages')

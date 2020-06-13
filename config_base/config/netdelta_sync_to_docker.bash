@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+# for syncing netdelta test code base under /home/iantibble/jango/netdelta to netdelta docker code base
+# NOTE : logging files for celery-monitor, and netdelta app and debug logs are excluded
+# migrations, settings, and wsgi.py are also excluded
+
+# Ian Tibble - 10 June 2020
+
 
 BASE_DIR="/home/iantibble"
 DOCKER_BASE="${BASE_DIR}/netdd"

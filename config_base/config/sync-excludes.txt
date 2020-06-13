@@ -21,6 +21,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+.git
 lib64/
 parts/
 sdist/
@@ -35,3 +36,4 @@ MANIFESTo__pycache__/
 *.py[cod]
 *$py.class
 ._*
+*swp

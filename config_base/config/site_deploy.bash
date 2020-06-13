@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 
 if [ "$1" == "-h" ]; then
-  echo "usage: site_deploy.bash site port [le]"
+  echo "usage: site_deploy.bash site port [le] [certs]"
   exit 0
 fi
 
 if [ "$#" -lt 2 ]; then
-  echo "Missing parameters; $1 - site name; $2 - port; [$3 - le ]"
+  echo "Missing parameters; $1 - site name; $2 - port; [$3 - le ]; [$4 - certs]"
   exit 1
 fi
 
-
+[[ "$#" -eq 3 ]] && [ "$3" != "le" ] && { echo "Invalid options: usage - run_web.sh site port [le] [certs]"; exit 1; }
+[[ "$#" -eq 4 ]] && [ "$4" != "certs" ] && { echo "Invalid options: usage - run_web.sh site port [le] [certs]"; exit 1; }
 
 DOCKER_DIR="/home/iantibble/netdd"
 CERTS_DIR="${DOCKER_DIR}"/config_base/config/certs
@@ -22,7 +23,8 @@ FILESERVER="file_server"
 
 [ -d "${CERTS_DIR}" ] || (echo "certs directory ${CERTS_DIR} not found"; exit 1;)
 
-[ "$3" == "le" ] && [ "$(ls -A ${CERTS_DIR})" ] || (echo "No certs found in ${CERTS_DIR}"; exit 1;)
+[ "$4" == "certs" ] && [ "$(ls -A ${CERTS_DIR})" ] || (echo "No certs found in ${CERTS_DIR}"; exit 1;)
+
 echo "Make sure mysql is shut down on the host first, and you have the correct Letsencrypt certs"
 
 [ "$(docker inspect -f '{{.State.Running}}' $DATABASE_CONTAINER)" == "true" ] || (echo "your mysql container ain't active - quitting"; exit 1;)
@@ -41,6 +43,7 @@ else
   exit 1
 fi
 
+# TODO: add in option for certs here
 if [ "$3" == "le" ]; then
   docker run -it -p $2:$2 --name netdelta_$1 --network netdelta_net -v netdelta_app:/srv/staging -v \
 netdelta_logs:/srv/logs -v le:/etc/letsencrypt -v data:/data -v netdelta_venv:/srv/netdelta_venv netdelta/$1:core $1 $2 le 1>> ${RUN_LOG_FILE}

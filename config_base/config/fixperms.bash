@@ -1,7 +1,7 @@
 #!/bin/bash
 WEBROOT=/var/www
 NETDELTA_APP=/srv/netdelta
-VENV=/srv/netdelta304
+VENV=/srv/netdelta_venv
 
 if [ "$1" == "-v" ]; then
   chgrp -Rv web $WEBROOT | grep -i "changed" | grep -v "symbolic link" | grep -v grep

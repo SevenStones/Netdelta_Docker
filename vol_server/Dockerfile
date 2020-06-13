@@ -24,7 +24,7 @@ RUN groupmod -g 1001 web
 RUN usermod -G web iantibble
 RUN chown -Rv iantibble:web /logs
 RUN chown -Rv iantibble:web /srv/staging
-RUN chowm -Rv iantibble:web /srv/netdelta_venv
+RUN chown -Rv iantibble:web /srv/netdelta_venv
 RUN chown -Rv mysql:mysql /data
 
 COPY $DOCKYARD_SRC $DOCKYARD_STAGING

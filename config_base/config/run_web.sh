@@ -1,4 +1,10 @@
 #!/bin/bash
+# Ian Tibble - 10 June 2020
+# run_web.sh entrypoint script - takes up to 4 parameters
+# run_web.sh site port [le] [certs]
+# the certs parameter won't be needed if the file_server container has /le mounted to the le docker volume,
+# and the container was started with /etc/letsencrypt mounted to the le docker volume
+
 
 if [ "$#" -lt 1 ]; then
   echo "Missing parameters; $1 - site name ]"
@@ -10,7 +16,9 @@ if [ "$2" -lt 1024 ]; then
   exit 1
 fi
 
-[[ "$#" -eq 3 ]] && [ "$3" != "le" ] && { echo "Invalid options: usage - run_web.sh site port [le]"; exit 1; }
+[[ "$#" -eq 3 ]] && [ "$3" != "le" ] && { echo "Invalid options: usage - run_web.sh site port [le] [certs]"; exit 1; }
+[[ "$#" -eq 4 ]] && [ "$4" != "certs" ] && { echo "Invalid options: usage - run_web.sh site port [le] [certs]"; exit 1; }
+
 
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
@@ -103,7 +111,12 @@ echo "listing /srv/netdelta after syncing"
 ls -la /srv/netdelta
 
 echo "Patching virtualenv"
+cmp ${CONFIG_ROOT}/patches/base.py.modified ${MYSQL_DIR}/base.py >/dev/null &&
+echo -e "Django MySQL base.py already patched: [${GREEN}OK${NC}]" ||
 patch_MySQL_base
+
+cmp ${CONFIG_ROOT}/patches/process.py.modified ${LIBNMAP_DIR}/process.py >/dev/null &&
+echo -e "libnmap process.py already patched: [${GREEN}OK${NC}]" ||
 patch_libnmap
 
 echo "Adjusting settings.py database name"
@@ -157,12 +170,15 @@ sed -i -E "s/SITE/$1/g" /etc/apache2/sites-available/$1.conf
 sed -i -E "s/PORT/$2/g" /etc/apache2/sites-available/$1.conf
 
 if [ "$3" == "le" ]; then
-  echo "Letsencrypt operations"
+  echo "Letsencrypt apache ops"
   mkdir -v /etc/letsencrypt
   cp -v $CONFIG_ROOT/options-ssl-apache.conf /etc/letsencrypt
   sed -i -E "s/<\/VirtualHost>//g" /etc/apache2/sites-available/$1.conf
   cat $CONFIG_ROOT/letsencrypt-apache2.conf >> /etc/apache2/sites-available/$1.conf
   sed -i -E "s/SITE/$1/g" /etc/apache2/sites-available/$1.conf
+fi
+
+if [ "$4" == "certs" ]; then
   mkdir -pv /etc/letsencrypt/live/$1.netdelta.io
   cp -v $CONFIG_ROOT/certs/privkey.pem /etc/letsencrypt/live/$1.netdelta.io
   cp -v $CONFIG_ROOT/certs/fullchain.pem /etc/letsencrypt/live/$1.netdelta.io

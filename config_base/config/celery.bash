@@ -2,7 +2,7 @@
 
 SITE_ROOT="/srv"
 NETDELTA_ROOT="${SITE_ROOT}/netdelta"
-VIRTUALENV_DIR="${SITE_ROOT}/netdelta304"
+VIRTUALENV_DIR="${SITE_ROOT}/netdelta_venv"
 PROC_FINDER="${VIRTUALENV_DIR}/bin/celery worker"
 PROG="${VIRTUALENV_DIR}/bin/celery"
 RETVAL=0
