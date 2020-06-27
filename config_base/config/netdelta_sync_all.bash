@@ -6,7 +6,7 @@
 #  usage: docker exec -d netdelta_<site_name> sh -c '/srv/config_base/config/netdelta_sync.bash'
 #
 #
-ROOT="/home/iantibble/netdd"
+ROOT="/srv"
 CONFIG_ROOT="${ROOT}/config_base/config"
 
 [ -f "${CONFIG_ROOT}/SITES" ] || ( echo "No sites file found under $CONFIG_ROOT"; exit 1; )

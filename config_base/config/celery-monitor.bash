@@ -52,7 +52,7 @@ stop (){
 
   Z=$(is_running)
 
-  if [ "$Z" == "" ]; then
+  if [ "$Z" != "" ]; then
     kill -9 $Z
     if [ "$?" -eq 0 ]; then
       echo -e "Celery-monitor shutdown successful: [${GREEN}OK${NC}]"
