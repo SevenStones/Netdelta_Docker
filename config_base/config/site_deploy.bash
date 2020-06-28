@@ -10,8 +10,9 @@ if [ "$#" -lt 2 ]; then
   exit 1
 fi
 
-[[ "$#" -eq 3 ]] && [ "$3" != "le" ] && { echo "Invalid options: usage - run_web.sh site port [le] [certs]"; exit 1; }
-[[ "$#" -eq 4 ]] && [ "$4" != "certs" ] && { echo "Invalid options: usage - run_web.sh site port [le] [certs]"; exit 1; }
+[ "$#" -gt 4 ] && { echo "Invalid options: usage - site_deploy.sh site port [le] [certs]"; exit 1; }
+[[ "$#" -eq 3 ]] && [ "$3" != "le" ] && { echo "Invalid options: usage - site_deploy.sh site port [le] [certs]"; exit 1; }
+[[ "$#" -eq 4 ]] && [ "$4" != "certs" ] && { echo "hello. Invalid options: usage - site_deploy.sh site port [le] [certs]"; exit 1; }
 
 DOCKER_DIR="/home/iantibble/netdd"
 CERTS_DIR="${DOCKER_DIR}"/config_base/config/certs
@@ -23,14 +24,14 @@ FILESERVER="file_server"
 
 [ -d "${CERTS_DIR}" ] || (echo "certs directory ${CERTS_DIR} not found"; exit 1;)
 
-[ "$4" == "certs" ] && [ "$(ls -A ${CERTS_DIR})" ] || (echo "No certs found in ${CERTS_DIR}"; exit 1;)
+[ "$4" == "certs" ] && [ "$(ls -A ${CERTS_DIR})" ] || { echo "No certs found in ${CERTS_DIR}"; exit 1; }
 
 echo "Make sure mysql is shut down on the host first, and you have the correct Letsencrypt certs"
 
-[ "$(docker inspect -f '{{.State.Running}}' $DATABASE_CONTAINER)" == "true" ] || (echo "your mysql container ain't active - quitting"; exit 1;)
-[ "$(docker inspect -f '{{.State.Running}}' $FILESERVER)" == "true" ] || (echo "your fileserver container ain't active - quitting"; exit 1;)
+[ "$(docker inspect -f '{{.State.Running}}' $DATABASE_CONTAINER)" == "true" ] || { echo "your mysql container ain't active - quitting"; exit 1; }
+[ "$(docker inspect -f '{{.State.Running}}' $FILESERVER)" == "true" ] || { echo "your fileserver container ain't active - quitting"; exit 1; }
 
-cd ${DOCKER_DIR} || (echo "Dockerfile not found, directory does not exist"; exit 1;)
+cd ${DOCKER_DIR} || { echo "Dockerfile not found, directory does not exist"; exit 1; }
 
 echo "initial build"
 docker build -t netdelta/$1:core --build-arg SITE=$1 --build-arg PORT=$2 . 1>> ${RUN_LOG_FILE}
@@ -43,14 +44,28 @@ else
   exit 1
 fi
 
-# TODO: add in option for certs here
-if [ "$3" == "le" ]; then
-  docker run -it -p $2:$2 --name netdelta_$1 --network netdelta_net -v netdelta_app:/srv/staging -v \
-netdelta_logs:/srv/logs -v le:/etc/letsencrypt -v data:/data -v netdelta_venv:/srv/netdelta_venv netdelta/$1:core $1 $2 le 1>> ${RUN_LOG_FILE}
-else
-  docker run -it -p $2:$2 --name netdelta_$1 --network netdelta_net -v netdelta_app:/srv/staging -v \
-netdelta_logs:/srv/logs -v le:/etc/letsencrypt -v data:/data -v netdelta_venv:/srv/netdelta_venv netdelta/$1:core $1 $2 1>> ${RUN_LOG_FILE}
-fi
+case "$#" in
+  4)
+    [ "$3" == "le" ] && [ "$4" == "certs" ] || { echo "Invalid options: usage - site_deploy.sh site port [le] [certs]"; exit 1; }
+    docker run -it -p $2:$2 --name netdelta_$1 --network netdelta_net -v netdelta_app:/srv/staging -v \
+    netdelta_logs:/srv/logs -v le:/etc/letsencrypt -v data:/data -v netdelta_venv:/srv/netdelta_venv \
+    netdelta/$1:core $1 $2 le certs 1>> ${RUN_LOG_FILE}
+    ;;
+  3)
+    [ "$3" == "le" ] || { echo "Invalid options: usage - site_deploy.sh site port [le] [certs]"; exit 1; }
+    docker run -it -p $2:$2 --name netdelta_$1 --network netdelta_net -v netdelta_app:/srv/staging -v \
+    netdelta_logs:/srv/logs -v le:/etc/letsencrypt -v data:/data -v netdelta_venv:/srv/netdelta_venv \
+    netdelta/$1:core $1 $2 le 1>> ${RUN_LOG_FILE}
+    ;;
+  2)
+    docker run -it -p $2:$2 --name netdelta_$1 --network netdelta_net -v netdelta_app:/srv/staging -v \
+    netdelta_logs:/srv/logs -v le:/etc/letsencrypt -v data:/data -v netdelta_venv:/srv/netdelta_venv \
+    netdelta/$1:core $1 $2 1>> ${RUN_LOG_FILE}
+    ;;
+  *)
+    { echo "Invalid options: usage - site_deploy.sh site port [le] [certs]"; exit 1; }
+esac
+
 echo "sleeping 10"
 sleep 10
 if [ "$(docker ps -a | grep -w netdelta_$1'$' | grep -v grep)" ]; then
