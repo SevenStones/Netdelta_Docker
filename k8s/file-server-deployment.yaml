@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: fileserver
+  name: fileserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fileserver
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: fileserver
+    spec:
+      containers:
+      - image: registry.netdelta.io/fileserver:1.0
+        imagePullPolicy: IfNotPresent
+        name: fileserver
+        resources: {}
+        volumeMounts:
+        - mountPath: /srv/staging
+          name: netdelta-app
+        - mountPath: /logs
+          name: netdelta-logs
+        - mountPath: /le
+          name: le
+        - mountPath: /data
+          name: data
+        - mountPath: /srv/netdelta_venv
+          name: netdelta-venv
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: netdelta-app
+        persistentVolumeClaim:
+          claimName: netdelta-app
+      - name: netdelta-logs
+        persistentVolumeClaim:
+          claimName: netdelta-logs
+      - name: le
+        persistentVolumeClaim:
+          claimName: le
+      - name: data
+        persistentVolumeClaim:
+          claimName: data
+      - name: netdelta-venv
+        persistentVolumeClaim:
+          claimName: netdelta-venv
+status: {}

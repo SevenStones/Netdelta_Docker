@@ -35,7 +35,7 @@ ls -la /srv/staging
 echo "config base"
 ls -la /srv/config_base
 
-[ ! -d "/srv/staging/netdelta" ] && (echo "looks like Netdelta hasn't been sync'd with the file server yet; exiting"; exit 1;)
+#[ ! -d "/srv/staging/netdelta" ] && (echo "looks like Netdelta hasn't been sync'd with the file server yet; exiting"; exit 1;)
 
 function patch_MySQL_base(){
   echo "Applying patch for base.py (MySQL Django framework)"
@@ -189,11 +189,13 @@ echo "enabling site"
 a2ensite $1.conf
 
 service apache2 restart
-service apache2 stop
 
 echo "Adjusting filesystem permissions"
 $CONFIG_ROOT/fixperms.bash
-
-# start celery worker
-#service celery start
-#tail -f /dev/null
+service rabbitmq-server stop
+service rabbitmq-server start
+service celery stop
+service celery start
+service postfix stop
+service postfix start
+service celery-monitor start

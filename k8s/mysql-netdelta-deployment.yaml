@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: netdelta-barbican
+  name: netdelta-barbican
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netdelta-barbican
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: netdelta-barbican
+    spec:
+      containers:
+      - image: registry.netdelta.io/mysql:5.7
+        imagePullPolicy: IfNotPresent
+        name: mysql-netdelta
+        ports:
+        - containerPort: 3306
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: data
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secrets
+                key: root-password
+      imagePullSecrets:
+        - name: regcred
+
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: data
+status: {}

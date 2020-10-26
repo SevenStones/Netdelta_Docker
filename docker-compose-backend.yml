@@ -1,0 +1,28 @@
+version: '3'
+volumes:
+  netdelta_app:
+  netdelta_logs:
+  le:
+  data:
+  netdelta_venv:
+services:
+  file_server:
+    volumes:
+      - netdelta_app:/srv/staging
+      - netdelta_logs:/logs
+      - le:/le
+      - data:/data
+      - netdelta_venv:/srv/netdelta_venv
+    build:
+      context: /home/iantibble/netdd/vol_server
+      dockerfile: Dockerfile
+    image: fileserver:actual
+  mysql_netdelta:
+    volumes:
+      - data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    build:
+      context: /home/iantibble/netdd
+      dockerfile: Dockerfile-mysql
+    image: netdelta/mysql:actual

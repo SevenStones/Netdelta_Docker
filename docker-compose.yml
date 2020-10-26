@@ -1,0 +1,12 @@
+version: '3'
+services:
+  nd_fileserver:
+    build:
+      context: /home/iantibble/netdd/vol_server
+      dockerfile: Dockerfile
+    image: fileserver:actual
+  nd_mysql:
+    build:
+      context: /home/iantibble/netdd
+      dockerfile: Dockerfile-mysql
+    image: netdelta/mysql:actual

@@ -24,7 +24,9 @@ FILESERVER="file_server"
 
 [ -d "${CERTS_DIR}" ] || (echo "certs directory ${CERTS_DIR} not found"; exit 1;)
 
-[ "$4" == "certs" ] && [ "$(ls -A ${CERTS_DIR})" ] || { echo "No certs found in ${CERTS_DIR}"; exit 1; }
+if [ "$4" == "certs" ]; then
+  [ "$(ls -A ${CERTS_DIR})" ] || { echo "No certs found in ${CERTS_DIR}"; exit 1; }
+fi
 
 echo "Make sure mysql is shut down on the host first, and you have the correct Letsencrypt certs"
 
