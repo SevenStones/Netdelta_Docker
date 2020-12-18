@@ -3,30 +3,30 @@ kind: Deployment
 metadata:
   creationTimestamp: null
   labels:
-    app: netdelta-barbican
-  name: netdelta-barbican
+    app: netdelta-xynexis
+  name: netdelta-xynexis
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: netdelta-barbican
+      app: netdelta-xynexis
   strategy:
     type: Recreate
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: netdelta-barbican
+        app: netdelta-xynexis
     spec:
       containers:
-      - image: registry.netdelta.io/netdelta/barbican:1.0
+      - image: registry.netdelta.io/netdelta/xynexis:1.0
         imagePullPolicy: IfNotPresent
-        name: netdelta-barbican
+        name: netdelta-xynexis
         ports:
-        - containerPort: 9004
+        - containerPort: 9005
         args:
-          - "barbican"
-          - "9004"
+          - "xynexis"
+          - "9005"
           - "le"
           - "certs"
         resources: {}

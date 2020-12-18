@@ -36,6 +36,8 @@ spec:
           name: netdelta-venv
       restartPolicy: Always
       serviceAccountName: ""
+      imagePullSecrets:
+        - name: regcred
       volumes:
       - name: netdelta-app
         persistentVolumeClaim:

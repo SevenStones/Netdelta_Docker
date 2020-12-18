@@ -90,7 +90,7 @@ echo "sleeping 10"
 sleep 10
 
 echo "setting up database: netdelta_$1"
-mysql -e "CREATE DATABASE IF NOT EXISTS netdelta_$1 CHARACTER SET utf8 COLLATE utf8_unicode_ci;" --user=root --password='ankSQL4r4' -h mysql_netdelta
+mysql -e "CREATE DATABASE IF NOT EXISTS netdelta_$1 CHARACTER SET utf8 COLLATE utf8_unicode_ci;" --user=root --password='ankSQL4r4' -h mysql-netdelta
 
 echo "Setting up Django and Apache Logs"
 mkdir -vp ${LOG_ROOT}
@@ -109,6 +109,14 @@ rsync -azrlv --exclude-from=$CONFIG_ROOT/deploy-excludes.txt /srv/staging/netdel
 
 echo "listing /srv/netdelta after syncing"
 ls -la /srv/netdelta
+
+echo "Virtualenv"
+cd /srv && python3 -m venv netdelta_venv
+
+cp -v $CONFIG_ROOT/requirements.txt $VENV_ROOT
+
+$VENV_ROOT/bin/pip3 install wheel
+$VENV_ROOT/bin/pip3 install -r $VENV_ROOT/requirements.txt
 
 echo "Patching virtualenv"
 cmp ${CONFIG_ROOT}/patches/base.py.modified ${MYSQL_DIR}/base.py >/dev/null &&
@@ -187,15 +195,12 @@ fi
 
 echo "enabling site"
 a2ensite $1.conf
-
 service apache2 restart
 
 echo "Adjusting filesystem permissions"
 $CONFIG_ROOT/fixperms.bash
-service rabbitmq-server stop
 service rabbitmq-server start
-service celery stop
 service celery start
-service postfix stop
 service postfix start
 service celery-monitor start
+tail -f /dev/null

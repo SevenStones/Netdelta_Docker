@@ -12,6 +12,7 @@ RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 COPY volumes_server.bash /srv
 RUN mkdir /logs
 #RUN mkdir /data
+RUN mkdir /staging
 RUN mkdir /srv/staging
 RUN mkdir /le
 RUN mkdir /data
@@ -23,14 +24,14 @@ RUN groupadd web
 RUN groupmod -g 1001 web
 RUN usermod -G web iantibble
 RUN chown -Rv iantibble:web /logs
-RUN chown -Rv iantibble:web /srv/staging
+RUN chown -Rv iantibble:web $DOCKYARD_STAGING
 RUN chown -Rv iantibble:web /srv/netdelta_venv
 RUN chown -Rv mysql:mysql /data
 
-COPY $DOCKYARD_SRC $DOCKYARD_STAGING
-RUN ls -laR $DOCKYARD_STAGING
+COPY $DOCKYARD_SRC /staging
+RUN ls -laR /staging
 EXPOSE 9600 80 443 22
 
 #COPY ./run_netdelta.sh /srv/staging
-VOLUME ["/srv/staging", "/logs", "/le", "/data", "/srv/netdelta_venv"]
+VOLUME ["$DOCKYARD_STAGING", "/logs", "/le", "/data", "/srv/netdelta_venv"]
 ENTRYPOINT ["/srv/volumes_server.bash"]

@@ -8,7 +8,7 @@ ARG PORT
 ENV PORT ${PORT:-8000}
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV DOCKYARD_SRC=nd_base
+ENV DOCKYARD_SRC=vol_server/nd_base
 ENV DOCKYARD_CONFIG=config_base
 # Directory in container for all project files
 ENV DOCKYARD_SRVHOME=/srv
@@ -66,18 +66,10 @@ RUN mkdir -pv /srv/staging
 RUN mkdir -pv /srv/logs/${SITE}
 RUN mkdir -pv /data
 
-
 COPY $DOCKYARD_CONFIG $CONFIG_BASE
 
 COPY $DOCKYARD_CONFIG/config/run_web.sh /srv
 
-RUN cd /srv && python3 -m venv netdelta_venv
-
-COPY $DOCKYARD_CONFIG/config/requirements.txt $VENVDIR
-
-RUN $VENVDIR/bin/pip3 install wheel
-RUN $VENVDIR/bin/pip3 install -r $VENVDIR/requirements.txt
-
 #COPY ./run_netdelta.sh /srv/staging
-VOLUME ["/etc/letsencrypt","/srv/staging", "/srv/logs", "/data", "/srv/netdelta_venv"]
+#VOLUME ["/etc/letsencrypt","/srv/staging", "/srv/logs", "/data", "/srv/netdelta_venv"]
 ENTRYPOINT ["/srv/run_web.sh"]

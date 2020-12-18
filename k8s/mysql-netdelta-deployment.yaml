@@ -3,20 +3,20 @@ kind: Deployment
 metadata:
   creationTimestamp: null
   labels:
-    app: netdelta-barbican
-  name: netdelta-barbican
+    app: mysql-netdelta
+  name: mysql-netdelta
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: netdelta-barbican
+      app: mysql-netdelta
   strategy:
     type: Recreate
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: netdelta-barbican
+        app: mysql-netdelta
     spec:
       containers:
       - image: registry.netdelta.io/mysql:5.7
@@ -36,7 +36,6 @@ spec:
                 key: root-password
       imagePullSecrets:
         - name: regcred
-
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
