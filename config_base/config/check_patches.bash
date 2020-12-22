@@ -80,9 +80,9 @@ function patch_libnmap(){
   fi
 }
 
-cmp ${PATCH_DIR}/base.py.modified ${MYSQL_DIR}/base.py >/dev/null &&
-  echo -e "Django MySQL base.py already patched: [${GREEN}OK${NC}]" ||
-  patch_MySQL_base "$2"
+#cmp ${PATCH_DIR}/base.py.modified ${MYSQL_DIR}/base.py >/dev/null &&
+#  echo -e "Django MySQL base.py already patched: [${GREEN}OK${NC}]" ||
+#  patch_MySQL_base "$2"
 
 cmp ${PATCH_DIR}/process.py.modified ${LIBNMAP_DIR}/process.py >/dev/null &&
   echo -e "libnmap process.py already patched: [${GREEN}OK${NC}]" ||

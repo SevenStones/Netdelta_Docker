@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: netdelta-ingress
+spec:
+  rules:
+    - host: local.netdelta.io
+      http:
+        paths:
+          - path: /
+            backend:
+              service:
+                name: netdelta-barbican
+                port:
+                  number: 9004
+            pathType: Prefix
+#    - host: xynexis.netdelta.io
+#      http:
+#        paths:
+#          - path: /
+#            pathType: Prefix
+#            backend:
+#              service:
+#                name: netdelta-xynexis
+#                port:
+#                  number: 9005
