@@ -1,7 +1,7 @@
---- process.cp	2020-04-01 23:05:41.371914425 +0100
-+++ process.py.moded	2020-04-01 22:49:46.636326983 +0100
-@@ -436,6 +436,13 @@
-         return self.__nmap_command_line or ''
+--- process.py	2020-12-24 20:35:11.578947670 +0000
++++ process.py.modified	2020-12-24 20:38:57.777076157 +0000
+@@ -491,6 +491,13 @@
+         return self.__nmap_command_line or ""
  
      @property
 +    def process_id(self):

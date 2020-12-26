@@ -23,9 +23,15 @@ ENV VENVDIR=/srv/netdelta_venv
 # Base setup
 # ADD resources/etc/apt/ /etc/apt/
 RUN apt-get -y update && \
-    apt-get install -q -y curl apache2 && \
+    apt-get install -q -y curl apache2 libmysqlclient-dev locales && \
     apt-get install -q -y apt-utils python3.6 python3-pip python3.6-dev mysql-client net-tools rsync python-mysqldb rabbitmq-server && \
     apt-get install -q -y nmap postfix phpmyadmin iputils-ping python3-venv apache2-dev netcat-openbsd vim openssh-server ntpdate
+
+# set system locale - yes, this is necessary
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
 RUN apt-get -y install software-properties-common
 RUN add-apt-repository ppa:certbot/certbot

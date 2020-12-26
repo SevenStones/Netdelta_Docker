@@ -119,9 +119,9 @@ $VENV_ROOT/bin/pip3 install wheel
 $VENV_ROOT/bin/pip3 install -r $VENV_ROOT/requirements.txt
 
 echo "Patching virtualenv"
-cmp ${CONFIG_ROOT}/patches/base.py.modified ${MYSQL_DIR}/base.py >/dev/null &&
-echo -e "Django MySQL base.py already patched: [${GREEN}OK${NC}]" ||
-patch_MySQL_base
+#cmp ${CONFIG_ROOT}/patches/base.py.modified ${MYSQL_DIR}/base.py >/dev/null &&
+#echo -e "Django MySQL base.py already patched: [${GREEN}OK${NC}]" ||
+#patch_MySQL_base
 
 cmp ${CONFIG_ROOT}/patches/process.py.modified ${LIBNMAP_DIR}/process.py >/dev/null &&
 echo -e "libnmap process.py already patched: [${GREEN}OK${NC}]" ||
