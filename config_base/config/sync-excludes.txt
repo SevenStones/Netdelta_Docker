@@ -1,6 +1,8 @@
 netdelta/settings.py
 netdelta/wsgi.py
 nd/migrations
+nd/netdelta_logger.py
+celmon_logger.py
 *.idea
 **/logs
 .exit

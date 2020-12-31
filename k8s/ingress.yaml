@@ -7,7 +7,7 @@ spec:
     - host: local.netdelta.io
       http:
         paths:
-          - path: /
+          - path: /barbican
             backend:
               service:
                 name: netdelta-barbican

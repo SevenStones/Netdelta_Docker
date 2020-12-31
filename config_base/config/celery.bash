@@ -3,12 +3,13 @@
 SITE_ROOT="/srv"
 NETDELTA_ROOT="${SITE_ROOT}/netdelta"
 VIRTUALENV_DIR="${SITE_ROOT}/netdelta_venv"
-PROC_FINDER="${VIRTUALENV_DIR}/bin/celery worker"
+PROC_FINDER="${VIRTUALENV_DIR}/bin/celery --app=nd worker"
 PROG="${VIRTUALENV_DIR}/bin/celery"
 RETVAL=0
 PROGNAME="celery"
 X=""
 LOGS_ROOT="${SITE_ROOT}/logs"
+LANG=C.UTF-8
 
 if [ ! -f "$PROG" ]; then
   echo "Celery not found"
@@ -45,7 +46,7 @@ start() {
 
   cd ${NETDELTA_ROOT} || (echo "Netdelta root directory not found; exit 1;")
 
-  su -m iantibble -c "celery --app=nd worker --loglevel=INFO -n SITE -Q SITE -E -B --logfile=${LOGS_ROOT}/SITE/celery.log 1>/dev/null&"
+  su -m iantibble -c "${PROG} --app=nd worker --loglevel=INFO -n SITE -Q SITE -E -B --logfile=${LOGS_ROOT}/SITE/celery.log 1>/dev/null&"
   Z=$(is_running)
   if [ "$Z" != "" ]; then
     echo -e "Celery worker launched successfully : [${GREEN}OK${NC}]"
