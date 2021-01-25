@@ -1,4 +1,4 @@
 # Netdelta_Docker
-Docker config files for Netdelta
+Docker/K8s config files for Netdelta
 
-My Docker setup for Netdelta deployment.
+My Docker and Kubernetes setup for Netdelta deployment.
